@@ -1,0 +1,68 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: post_app
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: post_nginx
+    ports:
+      - "8087:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:8.4
+    container_name: post_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: post_analytics
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+
+
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: post_redis
+    networks:
+      - backend
+  node:
+    image: node:22-alpine
+    container_name: post_node
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    networks:
+      - backend
+volumes:
+  mysql_data:
+
+
+networks:
+  backend:
