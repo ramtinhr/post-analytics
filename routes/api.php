@@ -16,8 +16,6 @@ Route::post(
 );
 
 
-// Public
-
 Route::get(
     '/posts',
     [PostController::class,'index']
@@ -29,8 +27,6 @@ Route::get(
     [PostController::class,'show']
 );
 
-
-// Protected
 
 Route::middleware('auth:sanctum')->group(function () {
 
