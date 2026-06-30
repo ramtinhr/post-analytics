@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Responses\ApiResponse;
+use App\Jobs\SendWelcomeEmail;
 
 class AuthController extends Controller
 {
@@ -23,6 +24,8 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
+
+        SendWelcomeEmail::dispatch($user);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
